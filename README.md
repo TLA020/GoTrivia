@@ -1,0 +1,2 @@
+# GoTrivia
+Simple trivia game
