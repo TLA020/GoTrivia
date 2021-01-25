@@ -83,6 +83,15 @@ func (tg *Manager) GetQuestion() {
 	tg.Send(fmt.Sprintf("..::Current Question: %s? ::..", tg.currentGame.Question.question), nil)
 }
 
+func (tg *Manager) GetScore(p *Player) {
+	tg.mutex.Lock()
+	defer tg.mutex.Unlock()
+	if player, found := tg.Players[p.Id]; found {
+		tg.Send(fmt.Sprintf("...::%s Score: %d", p.Name, player.Correct), nil)
+	} else {
+		tg.Send("..::Unknown player, 0 answers::..", nil)
+	}
+}
 // communication
 func (tg *Manager) Send(m string, p *Player) {
 	tg.Outgoing() <- Message{
