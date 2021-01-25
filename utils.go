@@ -4,10 +4,16 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"runtime"
+	"strings"
 )
 
 func scanLinesToArray(p string) (r []string, b bool) {
-	file, err := os.Open(p)
+	_, f, _, _ := runtime.Caller(0)
+	lastOccurrence := strings.LastIndex(f, "/")
+	dir := f[0:lastOccurrence]
+
+	file, err := os.Open(dir + p)
 	if err != nil {
 		log.Print(err)
 		return

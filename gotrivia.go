@@ -6,12 +6,12 @@ var questions []*Question
 
 func init() {
 	log.Print("init")
-	q, ok := scanLinesToArray("./questions.txt")
+	q, ok := scanLinesToArray("/questions.txt")
 	if !ok {
 		return
 	}
 
-	a, ok := scanLinesToArray("./answers.txt")
+	a, ok := scanLinesToArray("/answers.txt")
 	if !ok {
 		return
 	}

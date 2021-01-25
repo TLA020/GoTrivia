@@ -89,7 +89,7 @@ func (tg *Manager) GetScore(p *Player) {
 	if player, found := tg.Players[p.Id]; found {
 		tg.Send(fmt.Sprintf("...::%s Score: %d", p.Name, player.Correct), nil)
 	} else {
-		tg.Send("..::Unknown player, 0 answers::..", nil)
+		tg.Send(fmt.Sprintf("...::%s Score: 0", p.Name), nil)
 	}
 }
 // communication
