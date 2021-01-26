@@ -95,7 +95,9 @@ func (tg *Manager) GetQuestion() {
 
 func (tg *Manager) Skip() {
 	tg.mutex.Lock()
-	tg.Send(fmt.Sprintf("[Skipped] Answer: %s ", tg.currentGame.Question.answer), nil)
+	if tg.currentGame != nil {
+		tg.Send(fmt.Sprintf("[Skipped] Answer: %s ", tg.currentGame.Question.answer), nil)
+	}
 	tg.mutex.Unlock()
 	tg.NewGame()
 }
