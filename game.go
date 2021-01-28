@@ -1,6 +1,8 @@
 package GoTrivia
 
-import "time"
+import (
+	"time"
+)
 
 type Game struct {
 	Id int64
@@ -14,3 +16,4 @@ type Question struct {
 	answer string
 	hint string
 }
+

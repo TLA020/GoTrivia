@@ -29,96 +29,96 @@ func NewManager() *Manager {
 	}
 }
 
-func (tg *Manager) NewGame() {
-	tg.mutex.Lock()
-	defer tg.mutex.Unlock()
+func (m *Manager) NewGame() {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 
 	now := time.Now()
 	s := rand.NewSource(time.Now().Unix())
 	r := rand.New(s)
 
-	tg.currentGame = &Game{
+	m.currentGame = &Game{
 		Id:        now.UnixNano(),
 		Question:  questions[r.Intn(len(questions))],
 		StartTime: time.Now(),
 	}
-	log.Printf("[Question]: %s", tg.currentGame.Question.question)
-	log.Printf("[Answer]: %s", tg.currentGame.Question.answer)
+	log.Printf("[Question]: %s", m.currentGame.Question.question)
+	log.Printf("[Answer]: %s", m.currentGame.Question.answer)
 
-	tg.Send(fmt.Sprintf("[New Question]: %s?::..", tg.currentGame.Question.question), nil)
+	m.Send(fmt.Sprintf("[New Question]: %s?::..", m.currentGame.Question.question), nil)
 }
 
-func (tg *Manager) CurrentGame() *Game {
-	tg.mutex.Lock()
-	defer tg.mutex.Unlock()
+func (m *Manager) CurrentGame() *Game{
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 
-	return tg.currentGame
+	return m.currentGame
 }
 
-func (tg *Manager) TryAnswer(p *Player, a string) {
-	tg.mutex.Lock()
-	if tg.currentGame == nil {
-		tg.mutex.Unlock()
+func (m *Manager) TryAnswer(p *Player, a string) {
+	if m.currentGame == nil {
 		return
 	}
 
-	if !strings.EqualFold(tg.currentGame.Question.answer, a) {
-		tg.Send(fmt.Sprintf("[Wrong Answer]: %s", p.Name), p)
-		tg.Send(fmt.Sprintf("[Question]: %s?", tg.currentGame.Question.question), p)
-		tg.mutex.Unlock()
+	m.mutex.Lock()
+
+	if !strings.EqualFold(m.currentGame.Question.answer, a) {
+		m.Send(fmt.Sprintf("[Wrong Answer]: %s", p.Name), p)
+		m.Send(fmt.Sprintf("[Question]: %s?", m.currentGame.Question.question), p)
+		m.mutex.Unlock()
 		return
 	}
 
-	if player, found := tg.Players[p.Id]; found {
+	if player, found := m.Players[p.Id]; found {
 		player.Correct++
 	} else {
 		p.Correct = 1
-		tg.Players[p.Id] = p
+		m.Players[p.Id] = p
 	}
 
-	tg.Send(fmt.Sprintf("[Correct Answer]: %s", p.Name), p)
+	m.Send(fmt.Sprintf("[Correct Answer]: %s", p.Name), p)
 
-	tg.mutex.Unlock()
-	tg.NewGame()
+	m.mutex.Unlock()
+	m.NewGame()
 }
 
-func (tg *Manager) GetQuestion() {
-	tg.mutex.Lock()
-	defer tg.mutex.Unlock()
+func (m *Manager) GetQuestion() {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 
-	if tg.currentGame == nil {
-		tg.Send("[NO GAME]", nil)
+	if m.currentGame == nil {
+		m.Send("[NO GAME]", nil)
 	} else {
-		tg.Send(fmt.Sprintf("[Current Question]: %s? ", tg.CurrentGame().Question.question), nil)
+		m.Send(fmt.Sprintf("[Current Question]: %s? ", m.currentGame.Question.question), nil)
 	}
 }
 
-func (tg *Manager) Skip() {
-	tg.mutex.Lock()
-	if tg.currentGame != nil {
-		tg.Send(fmt.Sprintf("[Skipped] Answer: %s ", tg.currentGame.Question.answer), nil)
+func (m *Manager) Skip() {
+	m.mutex.Lock()
+	if m.currentGame != nil {
+		m.Send(fmt.Sprintf("[Skipped] Answer: %s ", m.currentGame.Question.answer), nil)
 	}
-	tg.mutex.Unlock()
-	tg.NewGame()
+	m.mutex.Unlock()
+	m.NewGame()
 }
 
-func (tg *Manager) GetScore(p *Player) {
-	tg.mutex.Lock()
-	defer tg.mutex.Unlock()
-	if player, found := tg.Players[p.Id]; found {
-		tg.Send(fmt.Sprintf("[%s Score]: %d", p.Name, player.Correct), nil)
+func (m *Manager) GetScore(p *Player) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	if player, found := m.Players[p.Id]; found {
+		m.Send(fmt.Sprintf("[%s Score]: %d", p.Name, player.Correct), nil)
 	} else {
-		tg.Send(fmt.Sprintf("[%s Score]: 0", p.Name), nil)
+		m.Send(fmt.Sprintf("[%s Score]: 0", p.Name), nil)
 	}
 }
 // communication
-func (tg *Manager) Send(m string, p *Player) {
-	tg.Outgoing() <- Message{
-		Message: m,
+func (m *Manager) Send(msg string, p *Player) {
+	m.Outgoing() <- Message{
+		Message: msg,
 		From:    p,
 	}
 }
 
-func (tg *Manager) Outgoing() chan Message {
-	return tg.out
+func (m *Manager) Outgoing() chan Message {
+	return m.out
 }
