@@ -111,6 +111,7 @@ func (m *Manager) GetScore(p *Player) {
 		m.Send(fmt.Sprintf("[%s Score]: 0", p.Name), nil)
 	}
 }
+
 // communication
 func (m *Manager) Send(msg string, p *Player) {
 	m.Outgoing() <- Message{
